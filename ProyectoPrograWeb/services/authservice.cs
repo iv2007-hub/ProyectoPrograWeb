@@ -37,7 +37,7 @@ public class authservice
             Fullname = dto.FullName,
             Email = dto.Email,
             PasswordHash = HashPassword(dto.Password),
-            Role = "user",
+            Roles = new List<string> { "user" },
             CreatedAt = DateTime.UtcNow
         };
         //
@@ -47,7 +47,7 @@ public class authservice
             { "Fullname", user.Fullname },
             { "Email", user.Email },
             { "Password", user.PasswordHash },
-            { "Role", user.Role },
+            { "Role", user.Roles },
             { "CreatedAt", user.CreatedAt },
 
         });
