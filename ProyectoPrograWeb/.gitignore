@@ -1,3 +1,9 @@
 ﻿Config/*
 appsettings.json
 appsettings.Development.json
+
+# Archivos temporales de Rider y .NET
+**/obj/
+**/bin/
+*.user
+.idea/
