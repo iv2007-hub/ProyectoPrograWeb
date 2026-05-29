@@ -36,8 +36,8 @@ public class authservice
             Id = Guid.NewGuid().ToString(),
             Fullname = dto.FullName,
             Email = dto.Email,
-            Password = HashPassword(dto.Password),
-            Role = "user",
+            PasswordHash = HashPassword(dto.Password),
+            Roles = new List<string> { "user" },
             CreatedAt = DateTime.UtcNow
         };
         //
@@ -47,7 +47,7 @@ public class authservice
             { "Fullname", user.Fullname },
             { "Email", user.Email },
             { "Password", user.PasswordHash },
-            { "Role", user.Role },
+            { "Role", user.Roles },
             { "CreatedAt", user.CreatedAt },
 
         });
