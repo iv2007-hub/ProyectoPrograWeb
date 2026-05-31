@@ -7,3 +7,6 @@ appsettings.Development.json
 **/bin/
 *.user
 .idea/
+
+# Credenciales de Firebase
+**/Configuration/
