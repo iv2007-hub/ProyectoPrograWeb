@@ -1230,19 +1230,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\truji\\.nuget\\packages\\": {}
+    "C:\\Users\\cstel\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
+      "projectUniqueName": "C:\\Users\\cstel\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
       "projectName": "ProyectoPrograWeb",
-      "projectPath": "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
-      "packagesPath": "C:\\Users\\truji\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\obj\\",
+      "projectPath": "C:\\Users\\cstel\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
+      "packagesPath": "C:\\Users\\cstel\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\cstel\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\truji\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\cstel\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -1308,7 +1308,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Users\\truji\\.dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Users\\cstel\\.dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
