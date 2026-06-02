@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj": {}
+    "C:\\Users\\sergi\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj": {}
   },
   "projects": {
-    "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj": {
+    "C:\\Users\\sergi\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
+        "projectUniqueName": "C:\\Users\\sergi\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
         "projectName": "ProyectoPrograWeb",
-        "projectPath": "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
-        "packagesPath": "C:\\Users\\truji\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\truji\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\obj\\",
+        "projectPath": "C:\\Users\\sergi\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\ProyectoPrograWeb.csproj",
+        "packagesPath": "C:\\Users\\sergi\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sergi\\RiderProjects\\ProyectoPrograWeb\\ProyectoPrograWeb\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\truji\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\sergi\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -80,7 +80,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Users\\truji\\.dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Users\\sergi\\.dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
