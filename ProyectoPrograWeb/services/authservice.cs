@@ -1,5 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using ProyectoPrograWeb.DTOs;
 using ProyectoPrograWeb.models;
 
@@ -9,56 +12,124 @@ namespace ProyectoPrograWeb.services;
 //en esta clase maneja lo relacionado al registro e inicio de sesion
 public class authservice
 {
-    private readonly firebaseservice _firebaseservice;
+     // maneja lo relacionado a registro e inicio de sesion
+    private readonly firebaseservice _firebaseService;
     private readonly IConfiguration _configuration;
 
-    public authservice(firebaseservice firebaseservice, IConfiguration configuration)
+    public authservice(firebaseservice firebaseService, IConfiguration configuration)
     {
-        _firebaseservice = firebaseservice;
+        _firebaseService = firebaseService;
         _configuration = configuration;
-        
-        
     }
 
     public async Task<user> Register(registerDTo dto)
     {
-        //primero siempre es verificar que no exista un user con ese correo
-        var collection = _firebaseservice.GetCollection("user");
+        // primero verificamos que no existe un usuario con ese correo
+        var collection = _firebaseService.GetCollection("users");
         var existing = await collection
             .WhereEqualTo("Email", dto.Email)
             .GetSnapshotAsync();
+
         if (existing.Count > 0)
-            throw new Exception("Ya existe un usuario con este correo");
+            throw new Exception("Ya existe un usuario con ese correo");
         
-        //darle permiso de que creo un nuevo usuario
+        // creamos el objeto con la contraseña hasheada
+
         var user = new user
         {
             Id = Guid.NewGuid().ToString(),
             Fullname = dto.FullName,
             Email = dto.Email,
-            PasswordHash = HashPassword(dto.Password),
+            PasswordHash = HashPasword(dto.Password),
             Roles = new List<string> { "user" },
-            CreatedAt = DateTime.UtcNow
+            CreatedAt =  DateTime.UtcNow
         };
-        //
+        
+        // guardamos en FS usando el Id como nombre del documento
         await collection.Document(user.Id).SetAsync(new Dictionary<string, object>
         {
             { "Id", user.Id },
-            { "Fullname", user.Fullname },
+            { "FullName", user.Fullname },
             { "Email", user.Email },
-            { "Password", user.PasswordHash },
+            { "PasswordHash", user.PasswordHash },
             { "Role", user.Roles },
-            { "CreatedAt", user.CreatedAt },
-
+            { "CreatedAt", user.CreatedAt }
         });
         return user;
+    }
+
+    public async Task<string> Login(loginDTo dto)
+    {
+        // Buscar al usuario por correo en FS
+        var collection = _firebaseService.GetCollection("users");
+        var snapshot = await collection
+            .WhereEqualTo("Email", dto.Email)
+            .GetSnapshotAsync();
+        
+        if(snapshot.Count == 0)
+            throw new Exception("No existe ningun usuario con esa credencial");
+        
+        // Si lo encontramos mapeamos manualmente el documento a nuestro objeto
+        // Usamos ToDictionary()
+        var doc = snapshot.Documents[0];
+        var data = doc.ToDictionary();
+
+        var user = new user
+        {
+            Id = data["Id"].ToString()!,
+            Fullname = data["FullName"].ToString()!,
+            Email = data["Email"].ToString()!,
+            PasswordHash = data["PasswordHash"].ToString()!,
+            Roles = new List<string> { data["Role"].ToString()! },
+            // Int64, necesitamos convertirlo
+            CreatedAt = ((Google.Cloud.Firestore.Timestamp)data["CreatedAt"]).ToDateTime()  
+        };
+        
+        // Verificar si la contraseña esta hasheada
+        if(!VerifyPassword(dto.Password, user.PasswordHash))
+            throw new Exception("Password incorrecto");
+        
+        // Se completo exitosamente, generamos un token JWT
+        return GenerateToken(user);
 
     }
 
-    private string HashPassword(string password)
+    private string GenerateToken(user user)
     {
+        // El token lleva cierta informacion, Id, Email y Role del usuario que hizo login
+        // Para proteccion de los endpoints, se sabe quien los esta llamando
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, string.Join(",", user.Roles))
+        };
+
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                
+                var token = new JwtSecurityToken(
+                        
+                        issuer: _configuration["Jwt:Issuer"], //Quien lo genera, nuestro token lo genera la app
+                        audience: _configuration["Jwt:Issuer"], // Para quien lo genera, clientes / front-end
+                        claims: claims, // Estos son los datos del usuario
+                        expires: DateTime.UtcNow.AddHours(8), //Tiempo de vida del token
+                        signingCredentials: creds // Firma de seguridad
+                        );
+                    return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private bool VerifyPassword(string dtoPassword, string userPasswordHash)
+    {
+        return HashPasword(dtoPassword) == userPasswordHash;
+    }
+
+    // Para encriptar la contraseña
+    private string HashPasword(string password)
+    {
+        // SHA256 - tipo de encriptacion
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
         return Convert.ToBase64String(bytes);
-        
     }
 }

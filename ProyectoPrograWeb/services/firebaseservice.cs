@@ -2,7 +2,7 @@
 
 namespace ProyectoPrograWeb.services;
 
-public class firebaseservice
+public class  firebaseservice
 {
     //este archivo sirve de fuente de comunicacion entre la app y firebase
     //todas las operaciones pasan por aqui si o si

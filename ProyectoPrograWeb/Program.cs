@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<firebaseservice>();
 
 // Registrar el servicio de solicitudes de donación
-builder.Services.AddScoped<RequestService>();
+builder.Services.AddScoped<ProyectoPrograWeb.services.RequestService>();
 
 // Documentación OpenAPI para probar los endpoints
 builder.Services.AddOpenApi();

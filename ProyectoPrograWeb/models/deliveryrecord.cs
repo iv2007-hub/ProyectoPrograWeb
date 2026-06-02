@@ -11,7 +11,7 @@ public class deliveryrecord
     public string DonorId { get; set; } = string.Empty;
     public string ReceiverId { get; set; } = string.Empty;
     
-    // la información del articulo entregado
+    // la informacion del articulo entregado
     public string ItemName { get; set; } = string.Empty;
     public string CategoryId { get; set; } = string.Empty;
     

@@ -2,7 +2,7 @@
 
 public class user
 {
-    //Representa un usuario dentor del sistema
+    //representa un usuario dentor del sistema
     //esta clase es lo que vamos a guardar en firestore
     
     public string Id { get; set; } = string.Empty;
