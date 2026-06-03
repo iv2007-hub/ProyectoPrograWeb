@@ -3,5 +3,5 @@
 public class UpdateDonationRequestDto
 {
     // valores permitidos: aceptada, rechazada, cancelada
-    public string NuevoEstado { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
 }

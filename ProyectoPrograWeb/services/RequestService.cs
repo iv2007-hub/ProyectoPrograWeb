@@ -5,9 +5,7 @@ using ProyectoPrograWeb.models;
 namespace ProyectoPrograWeb.services;
 
 /// <summary>
-/// servicio para la gestion de solicitudes de donacion en DonaCerca.
-/// permite a los receptores solicitar articulos y a los donantes
-/// administrar las solicitudes recibidas.
+/// Servicio para la gestión de solicitudes de donación en DonaCerca.
 /// </summary>
 public class RequestService
 {
@@ -19,7 +17,8 @@ public class RequestService
     }
 
     /// <summary>
-    /// registra una nueva solicitud de donacion por parte de un receptor.
+    /// Registra una nueva solicitud de donación.
+    /// Valida que el receptor no sea el mismo donante del artículo.
     /// </summary>
     public async Task<DonationRequestDto> CrearSolicitudAsync(string postId, string receiverId, string receiverName)
     {
@@ -29,12 +28,16 @@ public class RequestService
             var snapshotPost = await colPublicaciones.Document(postId).GetSnapshotAsync();
 
             if (!snapshotPost.Exists)
-                throw new Exception("No se encontro la publicacion solicitada");
+                throw new Exception("No se encontró la publicación solicitada");
 
             var publicacion = snapshotPost.ConvertTo<donationpost>();
 
-            if (publicacion.Status != "Disponible")
-                throw new Exception($"Este articulo no esta disponible. Estado: {publicacion.Status}");
+            // Validar que el receptor no sea el mismo donante
+            if (publicacion.DonorId == receiverId)
+                throw new Exception("No puedes solicitar tu propio artículo");
+
+            if (publicacion.Status != "disponible")
+                throw new Exception($"Este artículo no está disponible. Estado: {publicacion.Status}");
 
             var colSolicitudes = _firebaseservice.GetCollection("DonationRequests");
             var solicitudesExistentes = await colSolicitudes
@@ -71,6 +74,83 @@ public class RequestService
         catch (Exception ex)
         {
             throw new Exception($"No se pudo crear la solicitud: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// El donante selecciona al receptor ganador.
+    /// 1. La solicitud del receptor elegido cambia a "aceptada"
+    /// 2. Las otras solicitudes del mismo artículo cambian a "rechazada"
+    /// 3. El artículo cambia a "reservado"
+    /// 4. Se guarda el receptor seleccionado en el artículo
+    /// </summary>
+    public async Task<DonationRequestDto> SeleccionarReceptorAsync(string postId, string requestId, string donorId)
+    {
+        try
+        {
+            // Verificar que la publicación existe y pertenece al donante
+            var colPublicaciones = _firebaseservice.GetCollection("DonationPosts");
+            var snapshotPost = await colPublicaciones.Document(postId).GetSnapshotAsync();
+
+            if (!snapshotPost.Exists)
+                throw new Exception("No se encontró la publicación");
+
+            var publicacion = snapshotPost.ConvertTo<donationpost>();
+
+            if (publicacion.DonorId != donorId)
+                throw new Exception("No tienes permiso para seleccionar receptor en esta publicación");
+
+            if (publicacion.Status != "disponible")
+                throw new Exception("Este artículo ya no está disponible");
+
+            // Obtener la solicitud ganadora
+            var colSolicitudes = _firebaseservice.GetCollection("DonationRequests");
+            var snapshotSolicitud = await colSolicitudes.Document(requestId).GetSnapshotAsync();
+
+            if (!snapshotSolicitud.Exists)
+                throw new Exception("La solicitud no fue encontrada");
+
+            var solicitudGanadora = snapshotSolicitud.ConvertTo<donationrequest>();
+
+            // Aceptar la solicitud ganadora
+            await colSolicitudes.Document(requestId).UpdateAsync(new Dictionary<string, object>
+            {
+                { "Status", "aceptada" },
+                { "RespondedAt", DateTime.UtcNow }
+            });
+
+            // Rechazar todas las otras solicitudes del mismo artículo
+            var otrasSolicitudes = await colSolicitudes
+                .WhereEqualTo("PostId", postId)
+                .WhereEqualTo("Status", "pendiente")
+                .GetSnapshotAsync();
+
+            foreach (var doc in otrasSolicitudes.Documents)
+            {
+                if (doc.Id != requestId)
+                {
+                    await colSolicitudes.Document(doc.Id).UpdateAsync(new Dictionary<string, object>
+                    {
+                        { "Status", "rechazada" },
+                        { "RespondedAt", DateTime.UtcNow }
+                    });
+                }
+            }
+
+            // Actualizar el artículo a "reservado" y guardar el receptor seleccionado
+            await colPublicaciones.Document(postId).UpdateAsync(new Dictionary<string, object>
+            {
+                { "Status", "reservado" },
+                { "SelectedReceiverId", solicitudGanadora.ReceiverId },
+                { "ReservedAt", DateTime.UtcNow }
+            });
+
+            solicitudGanadora.Status = "aceptada";
+            return ConvertirADto(solicitudGanadora);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error al seleccionar receptor: {ex.Message}");
         }
     }
 
@@ -144,7 +224,7 @@ public class RequestService
     }
 
     /// <summary>
-    /// Cambia el estado de una solicitud.
+    /// Cambia el estado de una solicitud y rechaza las demás si se acepta.
     /// </summary>
     public async Task<DonationRequestDto> ActualizarEstadoSolicitudAsync(string requestId, string nuevoEstado)
     {
@@ -161,14 +241,37 @@ public class RequestService
                 throw new Exception("La solicitud no fue encontrada");
 
             var solicitud = snapshot.ConvertTo<donationrequest>();
+            var respondedAt = DateTime.UtcNow;
 
             await coleccion.Document(requestId).UpdateAsync(new Dictionary<string, object>
             {
                 { "Status", nuevoEstado },
-                { "RespondedAt", DateTime.UtcNow }
+                { "RespondedAt", respondedAt }
             });
 
+            // Si se acepta, rechazar automáticamente las otras solicitudes
+            if (nuevoEstado == "aceptada")
+            {
+                var otrasSolicitudes = await coleccion
+                    .WhereEqualTo("PostId", solicitud.PostId)
+                    .WhereEqualTo("Status", "pendiente")
+                    .GetSnapshotAsync();
+
+                foreach (var doc in otrasSolicitudes.Documents)
+                {
+                    if (doc.Id != requestId)
+                    {
+                        await coleccion.Document(doc.Id).UpdateAsync(new Dictionary<string, object>
+                        {
+                            { "Status", "rechazada" },
+                            { "RespondedAt", respondedAt }
+                        });
+                    }
+                }
+            }
+
             solicitud.Status = nuevoEstado;
+            solicitud.RespondedAt = respondedAt;
             return ConvertirADto(solicitud);
         }
         catch (Exception ex)
@@ -222,7 +325,7 @@ public class RequestService
             ReceiverName = solicitud.ReceiverName,
             Status = solicitud.Status,
             RequestTimestamp = solicitud.RequestTimestamp,
-            RespondedAt = null
+            RespondedAt = solicitud.RespondedAt
         };
     }
 }

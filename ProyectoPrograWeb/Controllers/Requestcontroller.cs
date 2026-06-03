@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProyectoPrograWeb.DTOs;
 using ProyectoPrograWeb.services;
 
@@ -6,8 +8,6 @@ namespace ProyectoPrograWeb.Controllers;
 
 /// <summary>
 /// Controlador para manejar las solicitudes de donación en DonaCerca.
-/// Permite a los receptores solicitar artículos y a los donantes
-/// ver y gestionar las solicitudes que han recibido.
 /// </summary>
 [ApiController]
 [Route("api/requests")]
@@ -25,12 +25,18 @@ public class RequestController : ControllerBase
     /// POST /api/requests
     /// </summary>
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CrearSolicitud([FromBody] CreateDonationRequestDto dto)
     {
         try
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            // Verificar que el usuario autenticado sea el mismo que hace la solicitud
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId != dto.ReceiverId)
+                return Unauthorized(new { mensaje = "No puedes crear solicitudes para otro usuario" });
 
             var resultado = await _requestService.CrearSolicitudAsync(
                 dto.PostId,
@@ -66,16 +72,18 @@ public class RequestController : ControllerBase
     }
 
     /// <summary>
-    /// Devuelve todas las solicitudes del receptor.
+    /// Devuelve todas las solicitudes del receptor autenticado.
     /// GET /api/requests/mine
     /// </summary>
     [HttpGet("mine")]
-    public async Task<IActionResult> ObtenerMisSolicitudes([FromQuery] string receiverId)
+    [Authorize]
+    public async Task<IActionResult> ObtenerMisSolicitudes()
     {
         try
         {
+            var receiverId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(receiverId))
-                return BadRequest(new { mensaje = "El id del receptor es requerido" });
+                return Unauthorized(new { mensaje = "Usuario no autenticado" });
 
             var solicitudes = await _requestService.ObtenerSolicitudesPorReceptorAsync(receiverId);
             return Ok(solicitudes);
@@ -105,18 +113,24 @@ public class RequestController : ControllerBase
     }
 
     /// <summary>
-    /// Actualiza el estado de una solicitud.
-    /// PUT /api/requests/{id}/status
+    /// El donante selecciona al receptor ganador.
+    /// PUT /api/requests/{postId}/select-receiver
     /// </summary>
-    [HttpPut("{id}/status")]
-    public async Task<IActionResult> ActualizarEstado(string id, [FromBody] UpdateDonationRequestDto dto)
+    [HttpPut("{postId}/select-receiver")]
+    [Authorize]
+    public async Task<IActionResult> SeleccionarReceptor(string postId, [FromBody] SelectReceiverDto dto)
     {
         try
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var resultado = await _requestService.ActualizarEstadoSolicitudAsync(id, dto.NuevoEstado);
+            // Verificar que el usuario autenticado sea el donante
+            var donorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(donorId))
+                return Unauthorized(new { mensaje = "Usuario no autenticado" });
+
+            var resultado = await _requestService.SeleccionarReceptorAsync(postId, dto.RequestId, donorId);
             return Ok(resultado);
         }
         catch (Exception ex)
@@ -130,12 +144,15 @@ public class RequestController : ControllerBase
     /// DELETE /api/requests/{id}/cancel
     /// </summary>
     [HttpDelete("{id}/cancel")]
-    public async Task<IActionResult> CancelarSolicitud(string id, [FromQuery] string receiverId)
+    [Authorize]
+    public async Task<IActionResult> CancelarSolicitud(string id)
     {
         try
         {
+            // Obtener el id del receptor del token
+            var receiverId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(receiverId))
-                return BadRequest(new { mensaje = "El id del receptor es requerido" });
+                return Unauthorized(new { mensaje = "Usuario no autenticado" });
 
             var resultado = await _requestService.CancelarSolicitudAsync(id, receiverId);
             return Ok(new { mensaje = "Solicitud cancelada correctamente", exito = resultado });
