@@ -2,23 +2,16 @@
 
 namespace ProyectoPrograWeb.DTOs;
 
-public class createdonationpostDTo
+public class getdonationpostDTo
 {
-    [Required]
+    public string Id { get; set; } = string.Empty;
     public string DonorId { get; set; } = string.Empty;
-    [Required]
-    public string DonorName { get; set; } = string.Empty;
-    [Required]
     public string CategoryId { get; set; } = string.Empty;
-    [Required]
-    [MinLength(3)]
     public string ItemName { get; set; } = string.Empty;
-    [Required]
-    public string Description { get; set; } = string.Empty;
-    [Required]
     public string ItemCondition { get; set; } = string.Empty;
-    [Required]
+    public string Description { get; set; } = string.Empty;
     public string Zone { get; set; } = string.Empty;
-
+    public string Status { get; set; } = string.Empty;
     public List<string> PhotoUrls { get; set; } = new();
+    public DateTime CreatedAt { get; set; }
 }

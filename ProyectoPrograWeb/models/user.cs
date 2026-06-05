@@ -13,7 +13,13 @@ public class user
     //la contraseña siempre va encriptada/hasheada
     public string PasswordHash { get; set; } = string.Empty;
     
-    //por defecto un usuario nuevo sera solo user
-    public string Role { get; set; } = "user";
+    //zona de referencia del usuario
+    public string Zone { get; set; } = string.Empty;
+    
+    //roles: donante, receptor o ambos
+    public List<string> Roles { get; set; } = new List<string>();
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    //controla si la cuenta esta activa
+    public bool IsActive { get; set; } = true;
 }

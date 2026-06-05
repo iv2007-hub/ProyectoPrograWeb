@@ -1,12 +1,18 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public class donationrequest
+public class DonationRequest
 {
-    public string Id { get; set; } = string.Empty;
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     
+    //referencia a la publicacion
     public string PostId { get; set; } = string.Empty;
     
-    public string ReceptorId { get; set; } = string.Empty;
+    //informacion del receptor que solicita
+    public string ReceiverId { get; set; } = string.Empty;
+    public string ReceiverName { get; set; } = string.Empty;
     
-    public string Estatus { get; set; } = "Pendiente";
+    //pendiente/aceptada/rechazada/cancelada
+    public string Status { get; set; } = requeststatus.Pendiente;
+    
+    public DateTime RequestTimestamp { get; set; } = DateTime.UtcNow;
 }
