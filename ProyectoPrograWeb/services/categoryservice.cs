@@ -8,6 +8,8 @@ public interface ICategoryService
 {
     Task<IEnumerable<categoryresponseDTo>> GetAllAsync();
     Task<categoryresponseDTo> CreateAsync(categorycreateDTo dto);
+    Task<categoryresponseDTo> UpdateAsync(string id, categoryupdateDTo dto);
+    Task<categoryresponseDTo?> ToggleStatusAsync(string id);
 }
 
 public class categoryservice : ICategoryService
@@ -45,12 +47,7 @@ public class categoryservice : ICategoryService
                     Name = data.ContainsKey("Name") ? data["Name"].ToString() ?? string.Empty : string.Empty,
                     IsActive = data.ContainsKey("IsActive") ? Convert.ToBoolean(data["IsActive"]) : false
                 };
-
-                // Filtramos para devolver solo las que estén activas
-                if (categoryDto.IsActive)
-                {
-                    categoryList.Add(categoryDto);
-                }
+                categoryList.Add(categoryDto);
             }
         }
 
@@ -78,6 +75,67 @@ public class categoryservice : ICategoryService
             Id = docRef.Id,
             Name = dto.Name,
             IsActive = true
+        };
+    }
+    
+    // Metodo completo para editar la categoría en Firestore
+    public async Task<categoryresponseDTo?> UpdateAsync(string id, categoryupdateDTo dto)
+    {
+        // Buscamos el documento específico por su ID único de Firebase
+        DocumentReference docRef = _firebaseService.GetCollection("Categories").Document(id);
+        DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+
+        if (!snapshot.Exists)
+        {
+            return null; // Si no existe, el controlador devolvera un 404 NotFound
+        }
+
+        // Actualizamos únicamente el campo name en la nube
+        Dictionary<string, object> updates = new Dictionary<string, object>
+        {
+            { "Name", dto.Name }
+        };
+        await docRef.UpdateAsync(updates);
+
+        // Mantenemos el estado actual de IsActive que ya tenía en la base de datos
+        Dictionary<string, object> currentData = snapshot.ToDictionary();
+        bool isActive = currentData.ContainsKey("IsActive") ? Convert.ToBoolean(currentData["IsActive"]) : true;
+
+        return new categoryresponseDTo
+        {
+            Id = id,
+            Name = dto.Name,
+            IsActive = isActive
+        };
+    }
+
+    // Metodo completo para activar/desactivar 
+    public async Task<categoryresponseDTo?> ToggleStatusAsync(string id)
+    {
+        DocumentReference docRef = _firebaseService.GetCollection("Categories").Document(id);
+        DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+
+        if (!snapshot.Exists)
+        {
+            return null;
+        }
+
+        Dictionary<string, object> currentData = snapshot.ToDictionary();
+        bool currentStatus = currentData.ContainsKey("IsActive") ? Convert.ToBoolean(currentData["IsActive"]) : true;
+        
+        bool newStatus = !currentStatus;
+
+        Dictionary<string, object> updates = new Dictionary<string, object>
+        {
+            { "IsActive", newStatus }
+        };
+        await docRef.UpdateAsync(updates);
+
+        return new categoryresponseDTo
+        {
+            Id = id,
+            Name = currentData.ContainsKey("Name") ? currentData["Name"].ToString() ?? string.Empty : string.Empty,
+            IsActive = newStatus
         };
     }
 }

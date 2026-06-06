@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProyectoPrograWeb.DTOs;
 using ProyectoPrograWeb.services;
 
@@ -6,6 +7,10 @@ namespace ProyectoPrograWeb.controllers;
 
 [ApiController]
 [Route("api/[controller]")] // Esto hace que la URL sea automáticamente: api/Category
+
+//Authorize protege todos los metodos dentro de este controlador
+//Se restringe para que solo los usuarios con rol Admin puedan entrar
+[Authorize(Roles = "Admin")]
 public class categorycontroller : ControllerBase
 {
     private readonly ICategoryService _categoryService;
@@ -51,6 +56,53 @@ public class categorycontroller : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { message = "Error al crear la categoría", error = ex.Message });
+        }
+    }
+    
+    // Endpoint para editar una categoría 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] categoryupdateDTo dto)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(dto.Name))
+            {
+                return BadRequest(new { message = "El nombre de la categoría no puede estar vacío." });
+            }
+
+            var result = await _categoryService.UpdateAsync(id, dto);
+            
+            if (result == null)
+            {
+                return NotFound(new { message = $"No se encontró la categoría con el ID: {id}" });
+            }
+
+            return Ok(result); 
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al actualizar la categoría", error = ex.Message });
+        }
+    }
+
+    // Endpoint para Activar/Desactivar categorias
+    [HttpPatch("{id}/toggle")]
+    public async Task<IActionResult> ToggleStatus(string id)
+    {
+        try
+        {
+            var result = await _categoryService.ToggleStatusAsync(id);
+
+            if (result == null)
+            {
+                return NotFound(new { message = $"No se encontró la categoría con el ID: {id}" });
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al cambiar el estado de la categoría", error = ex.Message });
         }
     }
 }

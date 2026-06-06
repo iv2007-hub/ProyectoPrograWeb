@@ -17,4 +17,10 @@
     {
         public string Name { get; set; } = string.Empty;
     }
+    
+    // Este lo usaremos exclusivamente para la edición (ej: en un PUT)
+    public class categoryupdateDTo
+    {
+        public string Name { get; set; } = string.Empty;
+    }
 }
