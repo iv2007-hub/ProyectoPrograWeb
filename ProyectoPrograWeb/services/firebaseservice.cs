@@ -2,13 +2,13 @@
 
 namespace ProyectoPrograWeb.services;
 
-public class firebaseservice
+public class Firebaseservice
 {
     //este archivo sirve de fuente de comunicacion entre la app y firebase
     //todas las operaciones pasan por aqui si o si
     private readonly FirestoreDb _firestoreDb;
 
-    public firebaseservice()
+    public Firebaseservice()
     {
         //le vamos a decir a firebase donde esta el archivo con las creedenciales
         //usamos las rutas del folder para encontrar
@@ -19,7 +19,7 @@ public class firebaseservice
         Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
         
         //ahora agregamos el id del proyecto para acceso a la fb
-        _firestoreDb = FirestoreDb.Create("proyecto-prograweb-723bb");
+        _firestoreDb = FirestoreDb.Create("chechoproyecto-848");
     }
 
     public CollectionReference GetCollection (string collectionName)

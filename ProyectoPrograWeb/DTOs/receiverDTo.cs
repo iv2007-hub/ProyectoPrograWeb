@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.DTOs;
 
-public class receiverDTo
+public class SelectReceiverDTo
 {
-    public string ReceiverId { get; set; } = string.Empty;
+    public string RequestId { get; set; } = string.Empty;
 }

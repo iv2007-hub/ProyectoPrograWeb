@@ -124,3 +124,4 @@ C:\Users\sergi\RiderProjects\ProyectoPrograWeb\ProyectoPrograWeb\obj\Debug\net10
 C:\Users\sergi\RiderProjects\ProyectoPrograWeb\ProyectoPrograWeb\obj\Debug\net10.0\ProyectoPrograWeb.pdb
 C:\Users\sergi\RiderProjects\ProyectoPrograWeb\ProyectoPrograWeb\obj\Debug\net10.0\ProyectoPrograWeb.genruntimeconfig.cache
 C:\Users\sergi\RiderProjects\ProyectoPrograWeb\ProyectoPrograWeb\obj\Debug\net10.0\ref\ProyectoPrograWeb.dll
+C:\Users\sergi\RiderProjects\ProyectoPrograWeb\ProyectoPrograWeb\bin\Debug\net10.0\Config\firebase-credentials.json

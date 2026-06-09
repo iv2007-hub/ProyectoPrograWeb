@@ -4,14 +4,14 @@ using ProyectoPrograWeb.models;
 
 namespace ProyectoPrograWeb.services;
 
-public class donationservice
+public class Donationservice
 {
     private const string CollectionName = "DonationPosts";
     private const string RequestCollectionName = "DonationRequests";
     
-    private readonly firebaseservice _firebaseservice;
+    private readonly Firebaseservice _firebaseservice;
 
-    public donationservice(firebaseservice firebaseservice)
+    public Donationservice(Firebaseservice firebaseservice)
     {
         _firebaseservice = firebaseservice;
     }
@@ -112,6 +112,8 @@ public class donationservice
 
     public async Task<List<donationpost>> GetAllActivePost()
     {
+        await AutoMarkAsExpired();
+        
         var collection = _firebaseservice.GetCollection(CollectionName);
 
         var query = await collection.WhereEqualTo("Status", donationstatus.Disponible).GetSnapshotAsync();

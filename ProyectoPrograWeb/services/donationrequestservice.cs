@@ -4,12 +4,12 @@ using ProyectoPrograWeb.models;
 
 namespace ProyectoPrograWeb.services;
 
-public class donationrequestservice
+public class Donationrequestservice
 {
     private const string CollectionName = "DonationRequests";
-    private readonly firebaseservice _firebaseservice;
+    private readonly Firebaseservice _firebaseservice;
 
-    public donationrequestservice(firebaseservice firebaseservice)
+    public Donationrequestservice(Firebaseservice firebaseservice)
     {
         _firebaseservice = firebaseservice;
     }

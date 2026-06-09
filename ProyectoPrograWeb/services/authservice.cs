@@ -13,10 +13,10 @@ namespace ProyectoPrograWeb.services;
 public class authservice
 {
      // Maneja lo relacionado a registro e inicio de sesion
-    private readonly firebaseservice _firebaseService;
+    private readonly Firebaseservice _firebaseService;
     private readonly IConfiguration _configuration;
 
-    public authservice(firebaseservice firebaseService, IConfiguration configuration)
+    public authservice(Firebaseservice firebaseService, IConfiguration configuration)
     {
         _firebaseService = firebaseService;
         _configuration = configuration;

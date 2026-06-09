@@ -1,16 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProyectoPrograWeb.DTOs;
+using ProyectoPrograWeb.models;
 using ProyectoPrograWeb.services;
 
 namespace ProyectoPrograWeb.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DonationcController : ControllerBase
+public class DonationController : ControllerBase
 {
-    private readonly donationservice _donationService;
+    private readonly Donationservice _donationService;
 
-    public DonationcController(donationservice donationService)
+    public DonationController(Donationservice donationService)
     {
         _donationService = donationService;
     }
@@ -39,14 +42,19 @@ public class DonationcController : ControllerBase
         var result = await _donationService.CreatePost(dto);
         return Ok(result);
     }
-
+    [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, [FromQuery] string donorId, [FromBody] updatedonationpostDTo? dto)
+    public async Task<IActionResult> Update(string id, [FromBody] updatedonationpostDTo? dto)
     {
         if (dto == null)
         {
             return BadRequest("Datos invalidos");
         }
+
+        var donorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(donorId))
+            return Unauthorized();
         
         var result = await _donationService.UpdatePost(id, donorId, dto);
 
@@ -57,9 +65,14 @@ public class DonationcController : ControllerBase
         return Ok("Publicacion actualizada correctamente");
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id, [FromQuery] string donorId)
+    public async Task<IActionResult> Delete(string id)
     {
+        var donorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(donorId))
+            return Unauthorized();
         var result = await _donationService.DesactivePost(id, donorId);
 
         if (!result)
@@ -77,26 +90,37 @@ public class DonationcController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("my-donations/{donorId}")]
-    public async Task<IActionResult> GetMyDonations(string donorId)
+    [Authorize]
+    [HttpGet("my-donations")]
+    public async Task<IActionResult> GetMyDonations()
     {
+        var donorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(donorId))
+            return Unauthorized();
+        
         var result = await _donationService.GetMyDonor(donorId);
         return Ok(result);
     }
 
-    [HttpPost("{id}/accept-request/{requestId}")]
-    public async Task<IActionResult> AcceptRequest(string id, string requestId)
+    [Authorize]
+    [HttpPost("{id}/reserve")]
+    public async Task<IActionResult> Reserve(string id, [FromBody] SelectReceiverDTo dto)
     {
-        var result = await _donationService.ChangeStatusToReserved(id, requestId);
-
+        if (dto == null || string.IsNullOrWhiteSpace(dto.RequestId))
+        {
+            return BadRequest("Request es obligatorio");
+        }
+        
+        var result = await _donationService.ChangeStatusToReserved(id, dto.RequestId);
         if (!result)
         {
             return BadRequest("No se pudo reservar la publicacion");
         }
-
         return Ok("Solicitud aceptada y publicacion reservada");
     }
-
+    
+    [Authorize]
     [HttpPost("{id}/deliver")]
     public async Task<IActionResult> Deliver(string id)
     {
