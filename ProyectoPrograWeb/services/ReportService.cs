@@ -3,7 +3,7 @@ using ProyectoPrograWeb.models;
 
 namespace ProyectoPrograWeb.services;
 
-// servicio que maneja la generación de reportes de impacto para el administrador
+// servicio que maneja la generacion de reportes de impacto para el administrador
 public class ReportService
 {
     private readonly firebaseservice _firebaseservice;
@@ -13,11 +13,22 @@ public class ReportService
         _firebaseservice = firebaseservice;
     }
 
-    // obtiene el reporte completo de estadísticas
+    // obtiene el reporte completo de estadisticas
     public async Task<ReportDTO> GetReportAsync()
     {
         var collection = _firebaseservice.GetCollection("DonationPosts");
         var snapshot = await collection.GetSnapshotAsync();
+
+        // obtiene los nombres de categorias para mostrar nombre legible en lugar de ID
+        var categoriesCollection = _firebaseservice.GetCollection("Categories");
+        var categoriesSnapshot = await categoriesCollection.GetSnapshotAsync();
+        var categoryNames = new Dictionary<string, string>();
+        foreach (var cat in categoriesSnapshot.Documents)
+        {
+            var id = cat.Id;
+            var name = cat.GetValue<string>("Name") ?? id;
+            categoryNames[id] = name;
+        }
 
         var report = new ReportDTO();
 
@@ -36,11 +47,12 @@ public class ReportService
             else if (status == "entregado")
                 report.TotalCompleted++;
 
-            // conteo por categoría
-            var categoryId = doc.GetValue<string>("CategoryId") ?? "sin categoría";
-            if (!report.ByCategory.ContainsKey(categoryId))
-                report.ByCategory[categoryId] = 0;
-            report.ByCategory[categoryId]++;
+            // conteo por categoria usando nombre legible
+            var categoryId = doc.GetValue<string>("CategoryId") ?? "";
+            var categoryName = categoryNames.ContainsKey(categoryId) ? categoryNames[categoryId] : "sin categoria";
+            if (!report.ByCategory.ContainsKey(categoryName))
+                report.ByCategory[categoryName] = 0;
+            report.ByCategory[categoryName]++;
         }
 
         // solicitudes pendientes
@@ -56,13 +68,13 @@ public class ReportService
             ? Math.Round((double)report.TotalCompleted / totalPublicadas * 100, 2)
             : 0;
 
-        // tendencia semanal de los últimos 4 períodos
+        // tendencia semanal de los ultimos 4 periodos
         report.WeeklyTrend = await GetWeeklyTrendAsync();
 
         return report;
     }
 
-    // calcula la tendencia de donaciones completadas por semana (últimas 4 semanas)
+    // calcula la tendencia de donaciones completadas por semana (ultimas 4 semanas)
     private async Task<List<WeeklyTrend>> GetWeeklyTrendAsync()
     {
         var deliveryCollection = _firebaseservice.GetCollection("DeliveryRecords");
@@ -72,16 +84,26 @@ public class ReportService
 
         foreach (var doc in snapshot.Documents)
         {
-            // agrupa por semana usando el campo completedAt
-            var completedAt = doc.GetValue<DateTime>("CompletedAt");
-            var weekStart = completedAt.AddDays(-(int)completedAt.DayOfWeek).ToString("yyyy-MM-dd");
+            try
+            {
+                // validacion: si CompletedAt es nulo se omite el documento
+                var completedAt = doc.GetValue<DateTime>("CompletedAt");
+                if (completedAt == default) continue;
 
-            if (!trend.ContainsKey(weekStart))
-                trend[weekStart] = 0;
-            trend[weekStart]++;
+                var weekStart = completedAt.AddDays(-(int)completedAt.DayOfWeek).ToString("yyyy-MM-dd");
+
+                if (!trend.ContainsKey(weekStart))
+                    trend[weekStart] = 0;
+                trend[weekStart]++;
+            }
+            catch
+            {
+                // si el campo no existe o es invalido, se omite este registro
+                continue;
+            }
         }
 
-        // devuelve las últimas 4 semanas ordenadas
+        // devuelve las ultimas 4 semanas ordenadas
         return trend
             .OrderByDescending(x => x.Key)
             .Take(4)

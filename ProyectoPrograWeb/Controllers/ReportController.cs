@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoPrograWeb.services;
 
@@ -16,8 +17,10 @@ public class ReportController : ControllerBase
     }
 
     // GET api/report
-    // devuelve el reporte completo de estadísticas (totales, categorías, estados, tendencia semanal)
+    // devuelve el reporte completo de estadisticas (totales, categorias, estados, tendencia semanal)
+    // solo accesible para administradores
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetReport()
     {
         try
