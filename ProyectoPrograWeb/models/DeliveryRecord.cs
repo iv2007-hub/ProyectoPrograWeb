@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public class deliveryrecord
+public class DeliveryRecord
 {
     public string Id { get; set; } = string.Empty;
     

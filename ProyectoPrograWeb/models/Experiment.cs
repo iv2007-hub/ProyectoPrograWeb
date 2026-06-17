@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public class experiment
+public class Experiment
 {
     public string Id { get; set; } = string.Empty;
     

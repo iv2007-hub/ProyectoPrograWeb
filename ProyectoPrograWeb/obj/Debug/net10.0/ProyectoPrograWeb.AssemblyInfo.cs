@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProyectoPrograWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+faed49fd6aad8f82a7e4498969f49567a7d0cc00")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+19e158f5a3e47f6e2a99983748027effd700f2bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProyectoPrograWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProyectoPrograWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

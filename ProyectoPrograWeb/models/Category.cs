@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public class category
+public class Category
 {
     public string Id { get; set; } = string.Empty;
     

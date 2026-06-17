@@ -9,4 +9,4 @@ appsettings.Development.json
 .idea/
 
 # Credenciales de Firebase
-**/Configuration/firebase-service.json
+**/Configuration/firebase-credentials1.json

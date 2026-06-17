@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.DTOs;
 
-public class experimentDTo
+public class ExperimentDTo
 {
     //lo que el frontend manda cuando se crea un experimento
     //el userid lo vamos a obtener del token (jnt)

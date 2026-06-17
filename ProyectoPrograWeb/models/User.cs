@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public class user
+public class User
 {
     //Representa un usuario dentor del sistema
     //esta clase es lo que vamos a guardar en firestore

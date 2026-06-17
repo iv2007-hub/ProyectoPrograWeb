@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public class donationstatistics
+public class DonationStatistics
 {
     //se muestra totales generales
     public int TotalActive { get; set; } = 0;
