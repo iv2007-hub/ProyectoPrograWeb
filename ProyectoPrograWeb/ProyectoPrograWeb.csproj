@@ -14,9 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="Configuration\firebase-credentials1.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
+      <Folder Include="Configuration\" />
     </ItemGroup>
 
 </Project>
