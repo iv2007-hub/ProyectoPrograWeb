@@ -16,13 +16,13 @@ namespace ProyectoPrograWeb.Controllers;
     {
         // Guardamos el servicio en una variable privada de solo lectura
         // Solo lectura porque no debería cambiar después de que se inyecta
-        private readonly authservice _authservice;
+        private readonly AuthService _authService;
 
         // El constructor recibe el AuthService gracias a la inyección de dependencias
         // .NET lo resuelve automáticamente porque lo registramos en Program.cs
-        public AuthController(authservice authservice)
+        public AuthController(AuthService authService)
         {
-            _authservice = authservice;
+            _authService = authService;
         }
 
         // HttpPost indica que este endpoint responde a peticiones POST
@@ -31,11 +31,11 @@ namespace ProyectoPrograWeb.Controllers;
         public async Task<IActionResult> Register(
             // FromBody le dice a .NET que lea los datos del cuerpo de la petición
             // El frontend manda un JSON y .NET lo convierte automáticamente al DTO
-            [FromBody] registerDTo dto)
+            [FromBody] RegisterDTo dto)
         {
             try
             {
-                var user = await _authservice.Register(dto);
+                var user = await _authService.Register(dto);
 
                 // Ok() devuelve un 200 con el objeto que le pasemos
                 // Solo devolvemos los campos necesarios, nunca el hash de la contraseña
@@ -53,12 +53,12 @@ namespace ProyectoPrograWeb.Controllers;
         [HttpPost("login")]
         public async Task<IActionResult> Login(
             // Igual que en register, FromBody convierte el JSON entrante al DTO
-            [FromBody] loginDTo dto)
+            [FromBody] LoginDTo dto)
         {
             try
             {
                 // Si las credenciales son correctas, recibimos el token JWT generado
-                var token = await _authservice.Login(dto);
+                var token = await _authService.Login(dto);
 
                 // Devolvemos el token al frontend para que lo guarde
                 // El frontend debe mandarlo en cada petición protegida como Bearer token

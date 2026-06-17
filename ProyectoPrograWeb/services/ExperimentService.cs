@@ -3,19 +3,19 @@ using ProyectoPrograWeb.models;
 
 namespace ProyectoPrograWeb.services;
 
-public class experimentservice
+public class ExperimentService
 {
     
-    private readonly firebaseservice _firebaseService;
+    private readonly FirebaseService _firebaseService;
 
-        public experimentservice(firebaseservice firebaseService)
+        public ExperimentService(FirebaseService firebaseService)
         {
             _firebaseService = firebaseService;
         }
 
-        public async Task<experiment> Create(experimentDTo dto, string userId)
+        public async Task<Experiment> Create(ExperimentDTo dto, string userId)
         {
-            var experiment = new experiment
+            var experiment = new Experiment
             {
                 Id = Guid.NewGuid().ToString(),
                 Title = dto.Title,
@@ -42,7 +42,7 @@ public class experimentservice
             return experiment;
         }
 
-        public async Task<List<experiment>> GetByUser(string userId)
+        public async Task<List<Experiment>> GetByUser(string userId)
         {
             // Solo traemos los experimentos del usuario que está logueado
             // No queremos que un usuario vea los experimentos de otro
@@ -50,13 +50,13 @@ public class experimentservice
                 .WhereEqualTo("UserId", userId)
                 .GetSnapshotAsync();
 
-            var experiments = new List<experiment>();
+            var experiments = new List<Experiment>();
 
             foreach (var doc in snapshot.Documents)
             {
                 var data = doc.ToDictionary();
 
-                experiments.Add(new experiment
+                experiments.Add(new Experiment
                 {
                     Id = data["Id"].ToString()!,
                     Title = data["Title"].ToString()!,

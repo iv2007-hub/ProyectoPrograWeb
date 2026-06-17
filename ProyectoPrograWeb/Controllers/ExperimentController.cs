@@ -9,7 +9,7 @@ namespace ProyectoPrograWeb.Controllers;
 
 
 
-public class experimentcontroller
+public class ExperimentController
 {
  
 [ApiController]
@@ -17,13 +17,13 @@ public class experimentcontroller
     // Authorize a nivel de clase significa que TODOS los endpoints de este controller
     // requieren un token JWT válido — sin token, el servidor devuelve 401 directamente
     [Authorize]
-    public class ExperimentController : ControllerBase
+    public class _ExperimentController : ControllerBase
     {
         // El servicio que maneja la lógica de experimentos
         // Lo recibimos por inyección de dependencias igual que en AuthController
-        private readonly experimentservice _experimentService;
+        private readonly ExperimentService _experimentService;
 
-        public ExperimentController(experimentservice experimentService)
+        public _ExperimentController(ExperimentService experimentService)
         {
             _experimentService = experimentService;
         }
@@ -33,7 +33,7 @@ public class experimentcontroller
         public async Task<IActionResult> Create(
             // FromBody convierte el JSON del cuerpo de la petición al DTO
             // El DTO solo trae Title, Result y Success — el UserId lo sacamos del token
-            [FromBody] experimentDTo dto)
+            [FromBody] ExperimentDTo dto)
         {
             try
             {

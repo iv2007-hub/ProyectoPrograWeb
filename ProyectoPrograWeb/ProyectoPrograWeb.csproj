@@ -13,4 +13,10 @@
         <PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Configuration\firebase-credentials1.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
