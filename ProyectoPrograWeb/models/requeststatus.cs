@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public class requeststatus
+public abstract class requeststatus
 {
     public const string Pendiente = "Pendiente";
     public const string Aceptada = "Aceptada";

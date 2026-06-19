@@ -32,7 +32,7 @@ public class DonationController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] createdonationpostDTo? dto)
+    public async Task<IActionResult> Create([FromBody] CreatedonationpostDTo? dto)
     {
         if (dto == null)
         {
@@ -44,7 +44,7 @@ public class DonationController : ControllerBase
     }
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, [FromBody] updatedonationpostDTo? dto)
+    public async Task<IActionResult> Update(string id, [FromBody] UpdatedonationpostDTo? dto)
     {
         if (dto == null)
         {

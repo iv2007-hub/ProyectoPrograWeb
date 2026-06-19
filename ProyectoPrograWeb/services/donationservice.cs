@@ -20,9 +20,9 @@ public class Donationservice
     private CollectionReference RequestCollection => 
         _firebaseservice.GetCollection(RequestCollectionName);
     
-    public async Task<donationpost> CreatePost(createdonationpostDTo dto)
+    public async Task<Donationpost> CreatePost(CreatedonationpostDTo dto)
     {
-        var post = new donationpost
+        var post = new Donationpost
             
         {
             Id = Guid.NewGuid().ToString(),
@@ -34,8 +34,8 @@ public class Donationservice
             ItemCondition = dto.ItemCondition,
             Zone = dto.Zone,
             PhotoUrls =  dto.PhotoUrls,
-            Status = donationstatus.Disponible,
-            CreatedAt = DateTime.UtcNow,
+            Status = Donationstatus.Disponible,
+            CreatedAt = DateTime.UtcNow
         };
         await Collection.Document(post.Id).SetAsync(post);
         return post;
@@ -62,7 +62,7 @@ public class Donationservice
             return false;
         }
         var post = await GetEntity(postId);
-        if (post == null || post.Status != donationstatus.Disponible)
+        if (post == null || post.Status != Donationstatus.Disponible)
         {
             return false;
         }
@@ -88,7 +88,7 @@ public class Donationservice
             await doc.Reference.SetAsync(otherRequest);
         }
 
-        post.Status = donationstatus.Reservado;
+        post.Status = Donationstatus.Reservado;
         post.SelectedReceiverId = request.ReceiverId;
         post.ReservedAt = DateTime.UtcNow;
         
@@ -96,7 +96,7 @@ public class Donationservice
         return true;
     }
     
-    private async Task<donationpost?> GetEntity(string id)
+    private async Task<Donationpost?> GetEntity(string id)
     {
         var doc = await Collection.Document(id).GetSnapshotAsync();
 
@@ -104,31 +104,31 @@ public class Donationservice
         {
             return null;
         }
-        return doc.ConvertTo<donationpost>();
+        return doc.ConvertTo<Donationpost>();
     }
 
-    public async Task<donationpost?> GetPostById(string id)
+    public async Task<Donationpost?> GetPostById(string id)
     =>await GetEntity(id);
 
-    public async Task<List<donationpost>> GetAllActivePost()
+    public async Task<List<Donationpost>> GetAllActivePost()
     {
         await AutoMarkAsExpired();
-        
-        var collection = _firebaseservice.GetCollection(CollectionName);
 
-        var query = await collection.WhereEqualTo("Status", donationstatus.Disponible).GetSnapshotAsync();
+        var snapshot = await Collection.GetSnapshotAsync();
             
-        return query.Documents.Select(d=>d.ConvertTo<donationpost>()).ToList();
+        return snapshot.Documents
+            .Select(d=>d.ConvertTo<Donationpost>())
+            .ToList();
     }
 
-    public async Task<List<donationpost>> GetMyDonor(String donorId)
+    public async Task<List<Donationpost>> GetMyDonor(String donorId)
     {
         var snapshot = await Collection.WhereEqualTo("DonorId", donorId).GetSnapshotAsync();
             
-        return snapshot.Documents.Select(d=>d.ConvertTo<donationpost>()).ToList();
+        return snapshot.Documents.Select(d=>d.ConvertTo<Donationpost>()).ToList();
     }
 
-    public async Task<bool> UpdatePost(string id, string donorId, updatedonationpostDTo dto)
+    public async Task<bool> UpdatePost(string id, string donorId, UpdatedonationpostDTo dto)
     {
         var post = await GetEntity(id);
         if (post == null)
@@ -141,7 +141,7 @@ public class Donationservice
             return false;
         }
 
-        if (post.Status != donationstatus.Disponible)
+        if (post.Status != Donationstatus.Disponible)
         {
             return false;
         }
@@ -170,12 +170,12 @@ public class Donationservice
             return false;
         }
 
-        if (post.Status != donationstatus.Disponible)
+        if (post.Status != Donationstatus.Disponible)
         {
             return false;
         }
 
-        post.Status = donationstatus.Vencido;
+        post.Status = Donationstatus.Vencido;
         await Collection.Document(id).SetAsync(post);
         return true;
     }
@@ -188,38 +188,38 @@ public class Donationservice
             return false;
         }
 
-        if (post.Status != donationstatus.Reservado)
+        if (post.Status != Donationstatus.Reservado)
         {
             return false;
         }
 
-        post.Status = donationstatus.Entregado;
+        post.Status = Donationstatus.Entregado;
         post.ClosedAt = DateTime.UtcNow;
         
         await Collection.Document(id).SetAsync(post);
         return true;
     }
 
-    public async Task<List<donationpost>> GetHistory()
+    public async Task<List<Donationpost>> GetHistory()
     {
-        var snapshot = await Collection.WhereEqualTo("Status", donationstatus.Entregado).GetSnapshotAsync();
-        return snapshot.Documents.Select(d=>d.ConvertTo<donationpost>()).ToList();
+        var snapshot = await Collection.WhereEqualTo("Status", Donationstatus.Entregado).GetSnapshotAsync();
+        return snapshot.Documents.Select(d=>d.ConvertTo<Donationpost>()).ToList();
     }
 
     public async Task AutoMarkAsExpired()
     {
         var snapshot = await Collection
-            .WhereEqualTo("Status", donationstatus.Disponible)
+            .WhereEqualTo("Status", Donationstatus.Disponible)
             .GetSnapshotAsync();
         
         var now = DateTime.UtcNow;
         foreach (var doc in snapshot.Documents)
         {
-            var post = doc.ConvertTo<donationpost>();
+            var post = doc.ConvertTo<Donationpost>();
 
             if ((now - post.CreatedAt).TotalDays >=30)
             {
-                post.Status = donationstatus.Vencido;
+                post.Status = Donationstatus.Vencido;
                 await doc.Reference.SetAsync(post);
             }
         }

@@ -1,5 +1,6 @@
 ﻿using Google.Cloud.Firestore;
 using ProyectoPrograWeb;
+using ProyectoPrograWeb.DTOs;
 using ProyectoPrograWeb.models;
 
 namespace ProyectoPrograWeb.services;
@@ -17,11 +18,11 @@ public class Donationrequestservice
     private CollectionReference Collection =>
         _firebaseservice.GetCollection(CollectionName);
     
-    public async Task<bool> CreateRequest(DonationRequest request)
+    public async Task<bool> CreateRequest(CreateDonationRequestDTo dTo)
     {
         var existing = await Collection
-            .WhereEqualTo("PostId", request.PostId)
-            .WhereEqualTo("ReceiverId", request.ReceiverId)
+            .WhereEqualTo("PostId", dTo.PostId)
+            .WhereEqualTo("ReceiverId", dTo.ReceiverId)
             .WhereEqualTo("Status", requeststatus.Pendiente)
             .GetSnapshotAsync();
 
@@ -29,6 +30,16 @@ public class Donationrequestservice
         {
             return false;
         }
+
+        var request = new DonationRequest
+        {
+            Id = Guid.NewGuid().ToString(),
+            PostId = dTo.PostId,
+            ReceiverId = dTo.ReceiverId,
+            ReceiverName = dTo.ReceiverName,
+            Status = requeststatus.Pendiente,
+            RequestTimestamp = DateTime.UtcNow
+        };
 
         await Collection.Document(request.Id).SetAsync(request);
         return true;

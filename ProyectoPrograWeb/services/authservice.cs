@@ -10,13 +10,13 @@ namespace ProyectoPrograWeb.services;
 
 
 //en esta clase maneja lo relacionado al registro e inicio de sesion
-public class authservice
+public class Authservice
 {
      // Maneja lo relacionado a registro e inicio de sesion
     private readonly Firebaseservice _firebaseService;
     private readonly IConfiguration _configuration;
 
-    public authservice(Firebaseservice firebaseService, IConfiguration configuration)
+    public Authservice(Firebaseservice firebaseService, IConfiguration configuration)
     {
         _firebaseService = firebaseService;
         _configuration = configuration;
@@ -58,7 +58,7 @@ public class authservice
         return user;
     }
 
-    public async Task<string> Login(loginDTo dto)
+    public async Task<string> Login(LoginDTo dto)
     {
         // Buscar al usuario por correo en FS
         var collection = _firebaseService.GetCollection("users");
@@ -98,21 +98,26 @@ public class authservice
     {
         // El token lleva cierta informacion, Id, Email y Role del usuario que hizo login
         // Para proteccion de los endpoints, se sabe quien los esta llamando
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, string.Join(",", user.Roles))
         };
+
+        foreach (var role in user.Roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+        
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
                 
                 var token = new JwtSecurityToken(
                         
                         issuer: _configuration["Jwt:Issuer"], //Quien lo genera, nuestro token lo genera la app
-                        audience: _configuration["Jwt:Issuer"], // Para quien lo genera, clientes / front-end
+                        audience: _configuration["Jwt:Audinece"], // Para quien lo genera, clientes / front-end
                         claims: claims, // Estos son los datos del usuario
                         expires: DateTime.UtcNow.AddHours(8), //Tiempo de vida del token
                         signingCredentials: creds // Firma de seguridad

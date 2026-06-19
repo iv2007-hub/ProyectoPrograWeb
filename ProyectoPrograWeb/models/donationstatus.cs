@@ -1,6 +1,6 @@
 ﻿namespace ProyectoPrograWeb.models;
 
-public static class donationstatus
+public static class Donationstatus
 {
     public const string Disponible = "Disponible";
     public const string Reservado = "Reservado";

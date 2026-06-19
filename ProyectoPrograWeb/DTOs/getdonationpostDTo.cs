@@ -2,7 +2,7 @@
 
 namespace ProyectoPrograWeb.DTOs;
 
-public class getdonationpostDTo
+public class GetdonationpostDTo
 {
     public string Id { get; set; } = string.Empty;
     public string DonorId { get; set; } = string.Empty;
