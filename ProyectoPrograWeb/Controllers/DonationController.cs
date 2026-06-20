@@ -13,11 +13,13 @@ public class DonationController : ControllerBase
 {
     private readonly DonationService _donationService;
     private readonly DeliveryService _deliveryService;
+    private readonly ICategoryService _categoryService;
 
-    public DonationController(DonationService donationService, DeliveryService deliveryService)
+    public DonationController(DonationService donationService, DeliveryService deliveryService, ICategoryService categoryService)
     {
         _donationService = donationService;
         _deliveryService = deliveryService;
+        _categoryService = categoryService;
     }
     
     [HttpGet("{id}")]
@@ -91,12 +93,33 @@ public class DonationController : ControllerBase
         return Ok("Publicacion eliminada correctamente");
     }
     
-    [HttpGet("active")]
-    public async Task<IActionResult> GetActive([FromQuery] string? categoryId = null, [FromQuery] string? zone = null)
-    {
-        var result = await _donationService.GetAllActivePost(categoryId, zone);
-        return Ok(result);
-    }
+   [HttpGet("active")]
+   public async Task<IActionResult> GetActive([FromQuery] string? categoryId = null, [FromQuery] string? zone = null)
+   {
+       var posts = await _donationService.GetAllActivePost(categoryId, zone);
+       
+       var result = new List<GetDonationPostDTo>();
+       foreach (var post in posts)
+       {
+           var categoryName = await _categoryService.GetCategoryNameAsync(post.CategoryId);
+           result.Add(new GetDonationPostDTo
+           {
+               Id = post.Id,
+               DonorId = post.DonorId,
+               CategoryId = post.CategoryId,
+               CategoryName = categoryName,
+               ItemName = post.ItemName,
+               ItemCondition = post.ItemCondition,
+               Description = post.Description,
+               Zone = post.Zone,
+               Status = post.Status,
+               PhotoUrls = post.PhotoUrls,
+               CreatedAt = post.CreatedAt
+           });
+       }
+       
+       return Ok(result);
+   }
     
     [Authorize]
     [HttpPost("{id}/schedule")]
@@ -120,8 +143,29 @@ public class DonationController : ControllerBase
         var donorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(donorId))
             return Unauthorized();
-        
-        var result = await _donationService.GetMyDonor(donorId);
+    
+        var posts = await _donationService.GetMyDonor(donorId);
+    
+        var result = new List<GetDonationPostDTo>();
+        foreach (var post in posts)
+        {
+            var categoryName = await _categoryService.GetCategoryNameAsync(post.CategoryId);
+            result.Add(new GetDonationPostDTo
+            {
+                Id = post.Id,
+                DonorId = post.DonorId,
+                CategoryId = post.CategoryId,
+                CategoryName = categoryName,
+                ItemName = post.ItemName,
+                ItemCondition = post.ItemCondition,
+                Description = post.Description,
+                Zone = post.Zone,
+                Status = post.Status,
+                PhotoUrls = post.PhotoUrls,
+                CreatedAt = post.CreatedAt
+            });
+        }
+    
         return Ok(result);
     }
     

@@ -13,7 +13,7 @@ public class FirebaseService
         //le vamos a decir a firebase donde esta el archivo con las creedenciales
         //usamos las rutas del folder para encontrar
         
-        var credentialPath =Path.Combine(AppContext.BaseDirectory, "Configuration", "firebase-credentials1.json");
+        var credentialPath =Path.Combine(AppContext.BaseDirectory, "Configuration", "firebase-credentials1 (2).json");
         
         //una variable para que podamos utilizar sdk de google
         Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);

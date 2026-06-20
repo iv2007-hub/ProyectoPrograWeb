@@ -10,6 +10,7 @@ public interface ICategoryService
     Task<categoryresponseDTo> CreateAsync(categorycreateDTo dto);
     Task<categoryresponseDTo> UpdateAsync(string id, categoryupdateDTo dto);
     Task<categoryresponseDTo?> ToggleStatusAsync(string id);
+    Task<string> GetCategoryNameAsync(string categoryId);
 }
 
 public class CategoryService : ICategoryService
@@ -121,6 +122,17 @@ public class CategoryService : ICategoryService
         };
     }
 
+    public async Task<string> GetCategoryNameAsync(string categoryId)
+    {
+        var collectionRef = _firebaseService.GetCollection("Categories");
+        var doc = await collectionRef.Document(categoryId).GetSnapshotAsync();
+    
+        if (!doc.Exists) return categoryId;
+    
+        var data = doc.ToDictionary();
+        return data.ContainsKey("Name") ? data["Name"].ToString() ?? categoryId : categoryId;
+    }
+    
     // Metodo completo para activar/desactivar 
     public async Task<categoryresponseDTo?> ToggleStatusAsync(string id)
     {

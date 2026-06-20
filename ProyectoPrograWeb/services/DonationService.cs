@@ -50,22 +50,27 @@ public class DonationService
 
         if (!snapshot.Exists)
         {
+            Console.WriteLine("Request no existe");
             return false;
         }
         var request = snapshot.ConvertTo<DonationRequest>();
 
         if (request.PostId != postId)
         {
+            Console.WriteLine($"PostId no coincide: {request.PostId} != {postId}");
             return false;
         }
 
-        if (request.Status != RequestStatus.Pendiente)
+        if (!string.Equals(request.Status, RequestStatus.Pendiente, StringComparison.OrdinalIgnoreCase))
         {
+            Console.WriteLine($"Status no es pendiente: {request.Status}");
             return false;
         }
+
         var post = await GetEntity(postId);
         if (post == null || post.Status != DonationStatus.Disponible)
         {
+            Console.WriteLine($"Post no disponible: {post?.Status}");
             return false;
         }
 
@@ -93,7 +98,7 @@ public class DonationService
         post.Status = DonationStatus.Reservado;
         post.SelectedReceiverId = request.ReceiverId;
         post.ReservedAt = DateTime.UtcNow;
-        
+    
         await Collection.Document(postId).SetAsync(post);
         return true;
     }

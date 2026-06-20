@@ -22,6 +22,7 @@ public class categorycontroller : ControllerBase
 
     // Endpoint para obtener todas las categorias
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         try
