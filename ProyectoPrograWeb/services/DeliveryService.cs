@@ -107,6 +107,16 @@ public class DeliveryService
 
         return deliverys;
     }
+    
+    public async Task<List<deliveryrecord>> GetAll()
+    {
+        var snapshot = await _firebaseService.GetCollection("DeliveryRecords")
+            .GetSnapshotAsync();
+
+        return snapshot.Documents
+            .Select(doc => MapToRecord(doc.ToDictionary()))
+            .ToList();
+    }
 
     private deliveryrecord MapToRecord(Dictionary<string, object> data)
     {
