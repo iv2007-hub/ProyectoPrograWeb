@@ -1,3 +1,12 @@
 ﻿Config/*
 appsettings.json
 appsettings.Development.json
+
+# Archivos temporales de Rider y .NET
+**/obj/
+**/bin/
+*.user
+.idea/
+
+# Credenciales de Firebase
+**/Configuration/firebase-credentials1.json
